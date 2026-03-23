@@ -1,3 +1,3 @@
 # WeWannaGraduate
-Team Members: Marsha Christian and Sarah Marques   
+Team Members: Marsha Christian   
 Class: CS3354.255  
