@@ -1,13 +1,15 @@
-import game.Game;
-
+import board.ChessGUI;
+import javax.swing.SwingUtilities;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("--- Welcome to Java Console Chess ---");
-        System.out.println("Type 'exit' at any time to quit.");
+        // program start
+        System.out.println("--- Starting Chess GUI ---");
         
-        // starting the game
-        Game chessGame = new Game();
-        chessGame.play();
+        SwingUtilities.invokeLater(() -> {
+            new ChessGUI();
+        });
+        
+        // removed "Type 'exit' to quit" since the GUI will handle closing the application
     }
 }
