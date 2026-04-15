@@ -12,17 +12,27 @@ public class Board {
     }
 
     private void setupBoard() {
-        // initializing pawns
-        for (int i = 0; i < 8; i++) {
-            grid[1][i] = new Pawn("black", new Position(1, i));
-            grid[6][i] = new Pawn("white", new Position(6, i));
-        }
-        // example of initializing rooks
+        // setup for black pieces (top of board)
         grid[0][0] = new Rook("black", new Position(0, 0));
+        grid[0][1] = new Knight("black", new Position(0, 1));
+        grid[0][2] = new Bishop("black", new Position(0, 2));
+        grid[0][3] = new Queen("black", new Position(0, 3));
+        grid[0][4] = new King("black", new Position(0, 4));
+        grid[0][5] = new Bishop("black", new Position(0, 5));
+        grid[0][6] = new Knight("black", new Position(0, 6));
         grid[0][7] = new Rook("black", new Position(0, 7));
+        for (int i = 0; i < 8; i++) grid[1][i] = new Pawn("black", new Position(1, i));
+    
+        // setup for white pieces (bottom of board)
         grid[7][0] = new Rook("white", new Position(7, 0));
+        grid[7][1] = new Knight("white", new Position(7, 1));
+        grid[7][2] = new Bishop("white", new Position(7, 2));
+        grid[7][3] = new Queen("white", new Position(7, 3));
+        grid[7][4] = new King("white", new Position(7, 4));
+        grid[7][5] = new Bishop("white", new Position(7, 5));
+        grid[7][6] = new Knight("white", new Position(7, 6));
         grid[7][7] = new Rook("white", new Position(7, 7));
-        // adding other piece etc. 
+        for (int i = 0; i < 8; i++) grid[6][i] = new Pawn("white", new Position(6, i));
     }
 
     public void display() {
