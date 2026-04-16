@@ -5,6 +5,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Stack;
+import java.io.File;
+import java.io.PrintWriter;
+import java.util.Scanner;
 
 public class ChessGUI extends JFrame {
     private JPanel boardPanel;
@@ -29,10 +32,16 @@ public class ChessGUI extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         JMenu gameMenu = new JMenu("Game");
         JMenuItem newItem = new JMenuItem("New Game");
+        JMenuItem saveItem = new JMenuItem("Save Game");
+        JMenuItem loadItem = new JMenuItem("Load Game");
         JMenuItem settingsItem = new JMenuItem("Settings");
         newItem.addActionListener(e -> resetGame());
+	saveItem.addActionListener(e -> saveGame());
+        loadItem.addActionListener(e -> loadGame());
         settingsItem.addActionListener(e -> openSettings());
         gameMenu.add(newItem);
+        gameMenu.add(saveItem);
+        gameMenu.add(loadItem);
         gameMenu.add(settingsItem);
         menuBar.add(gameMenu);
         setJMenuBar(menuBar);
@@ -105,6 +114,39 @@ public class ChessGUI extends JFrame {
         
         createGrid();
         setupInitialPieces();
+    }
+
+    private void saveGame() {
+        try (java.io.PrintWriter out = new java.io.PrintWriter("chess_save.txt")) {
+            out.println(currentTurn); 
+            for (int r = 0; r < 8; r++) {
+                for (int c = 0; c < 8; c++) {
+                    String text = squares[r][c].getText();
+                    out.println(text.equals("") ? "EMPTY" : text);
+                }
+            }
+            historyArea.append("SYSTEM: Game saved to chess_save.txt\n");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Save Failed!");
+        }
+    }
+    
+    private void loadGame() {
+        try (java.util.Scanner in = new java.util.Scanner(new java.io.File("chess_save.txt"))) {
+            currentTurn = in.nextLine();
+            turnLabel.setText("Current Turn: " + currentTurn.toUpperCase());
+            for (int r = 0; r < 8; r++) {
+                for (int c = 0; c < 8; c++) {
+                    String val = in.nextLine();
+                    squares[r][c].setText(val.equals("EMPTY") ? "" : val);
+                    if (val.startsWith("w")) squares[r][c].setForeground(new Color(0, 51, 102));
+                    else squares[r][c].setForeground(Color.BLACK);
+                }
+            }
+            historyArea.append("SYSTEM: Game loaded successfully!\n");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "No save file found!");
+        }
     }
 
     private void undoMove() {
