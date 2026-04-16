@@ -15,6 +15,15 @@ A functional, text-based chess application developed for Phase One. This game al
 ## How to Run
 1. Ensure you have **JDK 11** or higher installed.
 2. Open your terminal in the project root directory.
-3. Compile the project:
+3. To ensure the GUI and all packages (board, pieces, utils) are compiled correctly, please run the following commands from the root directory:
+   **Compile:**
+
    ```bash
-   javac Main.java
+   javac Main.java board/*.java pieces/*.java utils/*.java
+
+   Then
+
+   ```bash
+   java Main
+
+Enjoy!
