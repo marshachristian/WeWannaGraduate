@@ -21,8 +21,6 @@ A functional, text-based chess application developed for Phase One. This game al
    ```bash
    javac Main.java board/*.java pieces/*.java utils/*.java
 
-   Then
-
    ```bash
    java Main
 
