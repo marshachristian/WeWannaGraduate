@@ -15,8 +15,6 @@ public class ChessGUI extends JFrame {
     private JButton selectedSquare = null;
     private String currentTurn = "white"; 
     private JLabel turnLabel;
-
-    private Board gameBoard; 
     
     // --- GUI feature 2: board color themes ---
     private Color darkSquareColor = new Color(119, 148, 85); 
@@ -30,8 +28,6 @@ public class ChessGUI extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        gameBoard = new Board(); 
-
         // --- GUI feature 1: game menu ---
         JMenuBar menuBar = new JMenuBar();
         JMenu gameMenu = new JMenu("Game");
@@ -40,7 +36,7 @@ public class ChessGUI extends JFrame {
         JMenuItem loadItem = new JMenuItem("Load Game");
         JMenuItem settingsItem = new JMenuItem("Settings");
         newItem.addActionListener(e -> resetGame());
-        saveItem.addActionListener(e -> saveGame());
+	saveItem.addActionListener(e -> saveGame());
         loadItem.addActionListener(e -> loadGame());
         settingsItem.addActionListener(e -> openSettings());
         gameMenu.add(newItem);
@@ -173,54 +169,52 @@ public class ChessGUI extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             JButton clickedSquare = (JButton) e.getSource();
+            int row = -1, col = -1;
+    
+            // identify which button was clicked by comparing to our squares array
+            for (int r = 0; r < 8; r++) {
+                for (int c = 0; c < 8; c++) {
+                    if (squares[r][c] == clickedSquare) {
+                        row = r; col = c; break;
+                    }
+                }
+            }
+    
             if (selectedSquare == null) {
-                String text = clickedSquare.getText();
-                if (!text.equals("") && text.startsWith(currentTurn.substring(0, 1))) {
+                // use the row and col to get the corresponding Piece from backend Board
+                Piece p = gameBoard.getPiece(row, col);
+                if (p != null && p.getColor().equalsIgnoreCase(currentTurn)) {
                     selectedSquare = clickedSquare;
                     selectedSquare.setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
                 }
             } else {
-                if (clickedSquare.equals(selectedSquare)) {
-                    selectedSquare.setBorder(null);
-                    selectedSquare = null;
-                } else {
-                    String targetText = clickedSquare.getText();
-                    if (!targetText.equals("") && targetText.startsWith(currentTurn.substring(0, 1))) {
-                        selectedSquare.setBorder(null);
-                        selectedSquare = clickedSquare;
-                        selectedSquare.setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
-                        return; 
+                // convert gui coordinates to backend Positions
+                int startRow = -1, startCol = -1;
+                for (int r = 0; r < 8; r++) {
+                    for (int c = 0; c < 8; c++) {
+                        if (squares[r][c] == selectedSquare) {
+                            startRow = r; startCol = c;
+                        }
                     }
-
-                    if (!targetText.equals("")) {
-                        historyArea.append("CAPTURE: " + currentTurn.toUpperCase() + " took " + targetText + "!\n");
-                    } else {
-                        historyArea.append(currentTurn.toUpperCase() + ": " + selectedSquare.getText() + " moved.\n");
-                    }
-
-                    // saves state before move for undo functionality
-                    String[][] stateToSave = new String[8][8];
-                    for(int r=0; r<8; r++) for(int c=0; c<8; c++) stateToSave[r][c] = squares[r][c].getText();
-                    boardHistory.push(stateToSave);
-
-                    if (targetText.equals("bK") || targetText.equals("wK")) {
-                        JOptionPane.showMessageDialog(null, currentTurn.toUpperCase() + " WINS!");
-                        resetGame();
-                        return;
-                    }
-
-                    clickedSquare.setText(selectedSquare.getText());
-                    clickedSquare.setForeground(selectedSquare.getForeground());
-                    selectedSquare.setText("");
-                    selectedSquare.setBorder(null);
-                    selectedSquare = null;
-                    
-                    currentTurn = currentTurn.equals("white") ? "black" : "white";
-                    turnLabel.setText("Current Turn: " + currentTurn.toUpperCase());
                 }
+    
+                Position from = new Position(startRow, startCol);
+                Position to = new Position(row, col);
+    
+                // 4. Integration: Execute move in backend
+                // Note: In Phase 3, you should add a check here like if(p.isValidMove(to, gameBoard))
+                gameBoard.movePiece(from, to);
+    
+                // refresh the GUI to reflect the new board state
+                updateBoardUI();
+    
+                selectedSquare.setBorder(null);
+                selectedSquare = null;
+                
+                // switch turn
+                currentTurn = currentTurn.equals("white") ? "black" : "white";
+                turnLabel.setText("Current Turn: " + currentTurn.toUpperCase());
             }
-            boardPanel.revalidate();
-            boardPanel.repaint();
         }
     }
 
@@ -236,6 +230,26 @@ public class ChessGUI extends JFrame {
             squares[6][i].setForeground(new Color(0, 51, 102));
             squares[7][i].setText(whitePower[i]);
             squares[7][i].setForeground(new Color(0, 51, 102));
+        }
+    }
+
+    private void updateBoardUI() {
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Piece p = gameBoard.getPiece(r, c);
+                if (p == null) {
+                    squares[r][c].setText("");
+                } else {
+                    squares[r][c].setText(p.getSymbol());
+                    
+                    // keeping the color consistent with the initial setup
+                    if (p.getColor().equalsIgnoreCase("white")) {
+                        squares[r][c].setForeground(new Color(0, 51, 102));
+                    } else {
+                        squares[r][c].setForeground(Color.BLACK);
+                    }
+                }
+            }
         }
     }
 }
