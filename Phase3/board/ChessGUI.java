@@ -15,6 +15,7 @@ public class ChessGUI extends JFrame {
     private JButton selectedSquare = null;
     private String currentTurn = "white"; 
     private JLabel turnLabel;
+    private Board gameBoard; 
     
     // --- GUI feature 2: board color themes ---
     private Color darkSquareColor = new Color(119, 148, 85); 
@@ -22,11 +23,15 @@ public class ChessGUI extends JFrame {
     private Stack<String[][]> boardHistory = new Stack<>(); // for undo
 
     public ChessGUI() {
-        setTitle("Java Chess - Phase 2");
+        gameBoard = new Board(); 
+        setTitle("Java Chess - Phase 3");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(950, 800); 
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        createGrid();
+        updateBoardUI(); 
+        setVisible(true);
 
         // --- GUI feature 1: game menu ---
         JMenuBar menuBar = new JMenuBar();
@@ -36,7 +41,7 @@ public class ChessGUI extends JFrame {
         JMenuItem loadItem = new JMenuItem("Load Game");
         JMenuItem settingsItem = new JMenuItem("Settings");
         newItem.addActionListener(e -> resetGame());
-	saveItem.addActionListener(e -> saveGame());
+	    saveItem.addActionListener(e -> saveGame());
         loadItem.addActionListener(e -> loadGame());
         settingsItem.addActionListener(e -> openSettings());
         gameMenu.add(newItem);
@@ -62,7 +67,7 @@ public class ChessGUI extends JFrame {
 
         boardPanel = new JPanel(new GridLayout(8, 8));
         createGrid();
-        setupInitialPieces();
+        updateBoardUI();
 
         add(boardPanel, BorderLayout.CENTER);
         
@@ -101,7 +106,7 @@ public class ChessGUI extends JFrame {
         historyArea.setText("Move History:\n-----------------\n");
         boardHistory.clear();
         createGrid();
-        setupInitialPieces();
+        updateBoardUI();
     }
 
     private void openSettings() {
@@ -113,7 +118,7 @@ public class ChessGUI extends JFrame {
         else if (choice == 1) darkSquareColor = Color.GRAY;
         
         createGrid();
-        setupInitialPieces();
+        updateBoardUI();
     }
 
     private void saveGame() {
@@ -169,67 +174,37 @@ public class ChessGUI extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             JButton clickedSquare = (JButton) e.getSource();
-            int row = -1, col = -1;
-    
-            // identify which button was clicked by comparing to our squares array
-            for (int r = 0; r < 8; r++) {
-                for (int c = 0; c < 8; c++) {
-                    if (squares[r][c] == clickedSquare) {
-                        row = r; col = c; break;
-                    }
-                }
-            }
-    
+            int row = getRow(clickedSquare);
+            int col = getCol(clickedSquare);
+
             if (selectedSquare == null) {
-                // use the row and col to get the corresponding Piece from backend Board
                 Piece p = gameBoard.getPiece(row, col);
                 if (p != null && p.getColor().equalsIgnoreCase(currentTurn)) {
                     selectedSquare = clickedSquare;
                     selectedSquare.setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
                 }
             } else {
-                // convert gui coordinates to backend Positions
-                int startRow = -1, startCol = -1;
-                for (int r = 0; r < 8; r++) {
-                    for (int c = 0; c < 8; c++) {
-                        if (squares[r][c] == selectedSquare) {
-                            startRow = r; startCol = c;
-                        }
-                    }
-                }
-    
+                int startRow = getRow(selectedSquare);
+                int startCol = getCol(selectedSquare);
                 Position from = new Position(startRow, startCol);
                 Position to = new Position(row, col);
-    
-                // 4. Integration: Execute move in backend
-                // Note: In Phase 3, you should add a check here like if(p.isValidMove(to, gameBoard))
-                gameBoard.movePiece(from, to);
-    
-                // refresh the GUI to reflect the new board state
-                updateBoardUI();
-    
+                Piece p = gameBoard.getPiece(startRow, startCol);
+
+                if (p != null && p.isValidMove(to, gameBoard.getGrid())) {
+                    gameBoard.movePiece(from, to);
+                    
+                    // switch turn only on successful move
+                    currentTurn = currentTurn.equals("white") ? "black" : "white";
+                    turnLabel.setText("Current Turn: " + currentTurn.toUpperCase());
+                    
+                    updateBoardUI(); 
+                    checkEndgame(); 
+                } else {
+                    JOptionPane.showMessageDialog(null, "Illegal Move!");
+                }
                 selectedSquare.setBorder(null);
                 selectedSquare = null;
-                
-                // switch turn
-                currentTurn = currentTurn.equals("white") ? "black" : "white";
-                turnLabel.setText("Current Turn: " + currentTurn.toUpperCase());
             }
-        }
-    }
-
-    private void setupInitialPieces() {
-        String[] blackPower = {"bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"};
-        String[] whitePower = {"wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"};
-        for (int i = 0; i < 8; i++) {
-            squares[0][i].setText(blackPower[i]);
-            squares[0][i].setForeground(Color.BLACK);
-            squares[1][i].setText("bp");
-            squares[1][i].setForeground(Color.BLACK);
-            squares[6][i].setText("wp");
-            squares[6][i].setForeground(new Color(0, 51, 102));
-            squares[7][i].setText(whitePower[i]);
-            squares[7][i].setForeground(new Color(0, 51, 102));
         }
     }
 
@@ -237,19 +212,30 @@ public class ChessGUI extends JFrame {
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
                 Piece p = gameBoard.getPiece(r, c);
-                if (p == null) {
-                    squares[r][c].setText("");
-                } else {
-                    squares[r][c].setText(p.getSymbol());
-                    
-                    // keeping the color consistent with the initial setup
-                    if (p.getColor().equalsIgnoreCase("white")) {
-                        squares[r][c].setForeground(new Color(0, 51, 102));
-                    } else {
-                        squares[r][c].setForeground(Color.BLACK);
-                    }
+                squares[r][c].setText(p == null ? "" : p.getSymbol());
+                if (p != null) {
+                    squares[r][c].setForeground(p.getColor().equals("white") ? new Color(0, 51, 102) : Color.BLACK);
                 }
             }
         }
     }
+
+    private int getRow(JButton b) {
+        for(int r=0; r<8; r++) for(int c=0; c<8; c++) if(squares[r][c]==b) return r;
+        return -1;
+    }
+    private int getCol(JButton b) {
+        for(int r=0; r<8; r++) for(int c=0; c<8; c++) if(squares[r][c]==b) return c;
+        return -1;
+    }
+
+    private void checkEndgame() {
+        if (gameBoard.isCheckmate(currentTurn)) {
+            JOptionPane.showMessageDialog(this, "CHECKMATE! Game Over.");
+            resetGame();
+        } else if (gameBoard.isCheck(currentTurn)) {
+            turnLabel.setText("Current Turn: " + currentTurn.toUpperCase() + " (IN CHECK!)");
+        }
+    }
 }
+
