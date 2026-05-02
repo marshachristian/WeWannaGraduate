@@ -12,13 +12,16 @@ Follow these commands in your terminal from the root directory (Phase3/) to comp
 1. Compile the Source Code
 This command compiles all packages (board, pieces, utils) and places the class files in the current directory:
 
-Bash
+```bash
 javac -d . board/*.java pieces/*.java utils/*.java
+```
+
 2. Launch the Application
 Run the ChessGUI class (or Main if you are using a separate entry point):
 
-Bash
+```bash
 java board.ChessGUI
+```
 🛠️ Phase 3 Integration Details
 According to the rubric requirements, this phase successfully integrates the following components:
 
