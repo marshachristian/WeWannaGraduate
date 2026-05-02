@@ -2,25 +2,39 @@
 Team Members: Marsha Christian   
 Class: CS3354.255  
 
-# Console-Based Chess Game (Java)
+Java Chess - Phase 3 (Final Integration)
+📌 Project Overview
+This project is a fully functional, GUI-based Chess application developed in Java. Phase 3 marks the final integration between the Graphical User Interface and the Backend Game Logic. The application follows Object-Oriented Programming (OOP) principles, specifically utilizing Polymorphism and Encapsulation to enforce chess rules and manage game state.
 
-A functional, text-based chess application developed for Phase One. This game allows two players to interact via the command line using standard chess notation.
+🚀 How to Run the Game
+Follow these commands in your terminal from the root directory (Phase3/) to compile and launch the application.
 
-## Features
-* **Full 8x8 Board Setup:** All 32 pieces initialized in standard starting positions.
-* **Turn-Based Logic:** Alternates between White and Black players.
-* **Robust Input Parsing:** Handles user input (e.g., "E2 E4") and provides error feedback for invalid moves or incorrect formats without crashing.
-* **Modular Architecture:** Organized into logical packages (pieces, board, game, utils) for easy maintainability.
+1. Compile the Source Code
+This command compiles all packages (board, pieces, utils) and places the class files in the current directory:
 
-## How to Run
-1. Ensure you have **JDK 11** or higher installed.
-2. Open your terminal in the project root directory.
-3. To ensure the GUI and all packages (board, pieces, utils) are compiled correctly, please run the following commands from the root directory:
-   **Compile:**
+Bash
+javac -d . board/*.java pieces/*.java utils/*.java
+2. Launch the Application
+Run the ChessGUI class (or Main if you are using a separate entry point):
 
-   ```bash
-   javac Main.java board/*.java pieces/*.java utils/*.java
-   
-   java Main
+Bash
+java board.ChessGUI
+🛠️ Phase 3 Integration Details
+According to the rubric requirements, this phase successfully integrates the following components:
 
-Enjoy!
+Polymorphic Move Validation: The ChessGUI triggers move validation by calling the abstract isValidMove method defined in the Piece class. Each specific piece (Pawn, Rook, Knight, etc.) provides its own unique logic implementation.
+
+Encapsulated Game State: The Board class acts as the "Source of Truth." The GUI never manipulates piece data directly; it sends requests to the Board, which then manages the Piece objects.
+
+Event Handling: Implementation of ActionListener within ButtonClickListener allows the GUI to respond to user clicks, validate moves, update the display, and log game history.
+
+🎮 Implemented Features
+Move History: A side panel that logs every successful move made during the game.
+
+Undo System: A functional "Undo Move" button that utilizes a Stack to revert the board to its previous state.
+
+Save/Load: Ability to persist the current game state to a text file and resume it later.
+
+Turn Management: Automatic switching between White and Black turns with visual indicators.
+
+Rule Enforcement: Basic move validation for all pieces, preventing illegal movements or friendly fire.
