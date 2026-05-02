@@ -56,10 +56,39 @@ public class Board {
     public boolean isCheck(String color) { return false; } 
     public boolean isCheckmate(String color) { return false; }
 
+    public boolean kingExists(String color) {
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Piece p = grid[r][c];
+                if (p != null && p.getClass().getSimpleName().equalsIgnoreCase("King") 
+                    && p.getColor().equalsIgnoreCase(color)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public String[][] getSymbolGrid() {
+        String[][] symbols = new String[8][8];
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                symbols[r][c] = (grid[r][c] == null) ? "EMPTY" : grid[r][c].getSymbol();
+            }
+        }
+        return symbols;
+    }
+
+    public void setPieceAt(int row, int col, Piece piece) {
+        if (row >= 0 && row < 8 && col >= 0 && col < 8) {
+            grid[row][col] = piece;
+        }
+    }
+
     public void clearGrid() {
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
-                grid[r][c] = null;
+            grid[r][c] = null;
             }
         }
     }

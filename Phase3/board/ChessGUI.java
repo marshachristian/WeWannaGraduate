@@ -134,14 +134,29 @@ public class ChessGUI extends JFrame {
                 Position to = new Position(row, col);
                 Piece p = gameBoard.getPiece(startRow, startCol);
 
-                if (p != null && p.isValidMove(to, gameBoard)) {
-                    String moveLog = String.format("%s: %s to (%d, %d)\n", 
-                    currentTurn.toUpperCase(), 
-                    p.getClass().getSimpleName(), 
-                    row, col);
+                if (p != null && p.isValidMove(to, gameBoard)) {Piece target = gameBoard.getPiece(row, col);
+                    String captureMsg = "";
+
+                    if (target != null) {
+                        captureMsg = " [CAPTURED " + target.getClass().getSimpleName() + "]";
+                    
+                        if (target.getClass().getSimpleName().equalsIgnoreCase("King")) {
+                            JOptionPane.showMessageDialog(ChessGUI.this, "GAME OVER! " + currentTurn.toUpperCase() + " wins!");
+                            resetGame();
+                            return; 
+                        }
+                    }
+
+                    String moveLog = String.format("%s: %s to (%d, %d)%s\n", 
+                        currentTurn.toUpperCase(), 
+                        p.getClass().getSimpleName(), 
+                        row, col, captureMsg);
+                    
                     historyArea.append(moveLog);
                     saveStateForUndo();
+
                     gameBoard.movePiece(from, to);
+
                     currentTurn = currentTurn.equals("white") ? "black" : "white";
                     turnLabel.setText("Current Turn: " + currentTurn.toUpperCase());
                     updateBoardUI(); 
