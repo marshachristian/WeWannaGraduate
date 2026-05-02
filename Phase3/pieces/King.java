@@ -8,12 +8,17 @@ public class King extends Piece {
 
     @Override
     public String getSymbol() {
-        return color.equals("white") ? "wp" : "bp";
+        return color.equals("white") ? "wK" : "bK";
     }
 
     @Override
-    public boolean isValidMove(Position newPos, Board board) {
-      
-        return true; 
+    public boolean isValidMove(Position to, Board board) {
+        int rowDiff = Math.abs(to.getRow() - position.getRow());
+        int colDiff = Math.abs(to.getCol() - position.getCol());
+    
+        if (rowDiff > 1 || colDiff > 1 || (rowDiff == 0 && colDiff == 0)) return false;
+    
+        Piece target = board.getPiece(to.getRow(), to.getCol());
+        return target == null || !target.getColor().equals(this.color);
     }
 }
